@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html style=" overflow: scroll; ">
+<!--From https://codepen.io/frytyler/pen/EGdtg-->
+<head>
+  <meta charset="UTF-8">
+  <title>Student Performance</title>
+  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+</head>
+
+<body>
+
+	<h1>PREDICTING STUDENT PERFORMANCE USING EDUCATIONAL DATA MINING </h1>
+
+ <div class="login">
+
+	<h1><br> </h1>
+
+     <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict')}}"method="post">
+    	School:<input type="text" name="school" placeholder="School" required="required" />
+        Gender:<input type="text" name="sex" placeholder="Gender" required="required" />
+	    Age:<input type="text" name="age" placeholder="Age" required="required" />
+		Address:<input type="text" name="address" placeholder="Address" required="required" />
+		  Family Size:<input type="text" name="famsize" placeholder="Famsize" required="required" />
+		  Parent Status:<input type="text" name="Pstatus" placeholder="Parent Status" required="required" />
+		  Mother Education:<input type="text" name="Medu" placeholder="Mother Education" required="required" />
+		  Father Education:<input type="text" name="Fedu" placeholder="Father Education" required="required" />
+		  Mother Job:<input type="text" name="Mjob" placeholder="Mother Job" required="required" />
+		  Father Job:<input type="text" name="Fjob" placeholder="Father Job" required="required" />
+		  Guardian:<input type="text" name="guardian" placeholder="Guardian" required="required" />
+		  Reason:<input type="text" name="Reason" placeholder="Reason" required="required" />
+		  Travel Time:<input type="text" name="traveltime" placeholder="Travel Time" required="required" />
+		  Study Time:<input type="text" name="studytime" placeholder="Study Time" required="required" />
+		  Failures:<input type="text" name="failures" placeholder="Failures" required="required" />
+		  School Support:<input type="text" name="schoolsup" placeholder="School Support" required="required" />
+		  Family Support:<input type="text" name="famsup" placeholder="Family Support" required="required" />
+		  Paid:<input type="text" name="paid" placeholder="Paid" required="required" />
+		  Activities:<input type="text" name="activities" placeholder="Activities" required="required" />
+		  Nursery:<input type="text" name="nursery" placeholder="Nursery" required="required" />
+		  Higher Education:<input type="text" name="higher" placeholder="Higher Education" required="required" />
+		  Internet:<input type="text" name="internet" placeholder="Internet" required="required" />
+		  Romantic Relationship:<input type="text" name="romantic" placeholder="Romantic Relationship" required="required" />
+		  Family Relationship:<input type="text" name="famrel" placeholder="Family Relationship" required="required" />
+		  Free Time:<input type="text" name="freetime" placeholder="Free Time" required="required" />
+		  Going Out:<input type="text" name="goout" placeholder="Going Out" required="required" />
+		  Communucation skills:<input type="text" name="Dalc" placeholder="Communication skills" required="required" />
+		  Cultural activities:<input type="text" name="Walc" placeholder="Cultural activities" required="required" />
+		  Health:<input type="text" name="health" placeholder="Health" required="required" />
+		  Absences:<input type="text" name="absences" placeholder="Absences" required="required" />
+		  
+		
+        <button type="submit" class="btn btn-primary btn-block btn-large">Predict</button>
+    </form>
+
+   <br>
+   <br>
+   {{ prediction_text }}
+
+ </div>
+
+
+</body>
+</html>
 
