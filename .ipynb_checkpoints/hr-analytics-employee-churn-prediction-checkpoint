@@ -1,0 +1,247 @@
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+# Load and Explore Dataset
+# Import the necessary packages
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from xgboost import XGBClassifier
+
+from sklearn.model_selection import GridSearchCV
+
+from sklearn.metrics import confusion_matrix,accuracy_score,classification_report
+# from sklearn.metrics import roc_auc_score,roc_curve,scorer
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score,recall_score
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+sns.set(color_codes=True)
+%matplotlib inline
+%config InlineBackend.figure_formats = {'png', 'retina'}
+
+# Suppressing Warnings
+import warnings
+warnings.filterwarnings('ignore')
+# Load the dataset
+df = pd.read_csv('HR_bak.csv')
+df.head()
+df.keys()
+# Display dataset shape
+df.shape
+# Display descriptive statistics
+df.describe()
+# Display data information
+df.info()
+- "satisfaction_level" contains 2 missing values. Let's input them. 
+
+- Wwe need to convert categorical variables into dummy variables: "department", "salary" 
+## Data Preprocessing
+### Input missing values
+# Check the distribution of "satisfaction_level"
+df["satisfaction_level"].hist()
+- The data is not uniformly or normally distributed.
+
+- The variable is a continuous variable, so let's impute them withe the median.
+# Impute missing values in "Age" with median
+df["satisfaction_level"] = df["satisfaction_level"].fillna(df["satisfaction_level"].median())
+### Convert categorical varaibles into dummy variables
+# Check the values of "department"
+df['department'].value_counts()
+# Check the valus of the "salary"
+df['salary'].value_counts()
+Both "department" and "salary" contain more than two values. So let's use get_dummies to create dummy variables.
+# Convert categorical variables into numeric, dummy variables.
+
+# Convert "department" into dummy variables
+df = pd.concat([df, pd.get_dummies(df["department"], prefix="department")], axis=1).drop(columns=["department"])
+
+# Convert "salary" into dummy variables
+df = pd.concat([df, pd.get_dummies(df["salary"], prefix="salary")], axis=1).drop(columns=["salary"])
+
+# Display the part of the train set to see if the categorical variables were properly converted.
+df.head(10)
+df
+### Train-Test split
+# Split data into train and test Datasets
+
+# Separate the dataset into features and target
+X = df.drop(['left'],axis=1)
+y = df['left']
+
+# Splitting the data into train and test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.30, stratify=y, random_state=101)
+X.keys()
+# Scale the data
+
+# Standardize the columns the values of which are out of 0-1 range
+scaler = StandardScaler().fit(X_train)
+
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
+# Check the data balance
+
+# Count the number of churn (=1)
+y.value_counts()
+### Check the churn rate
+churn_rate = (sum(df['left'])/len(df['left'].index))*100
+churn_rate
+The employee churn rate is 23.8. We can say that it is an imbalanced dataset.
+## Classification with Imbalanced Data
+### Logistic Regression with Imbalanced Data
+# Initiate the model
+base_lm = LogisticRegression()
+# Fit the model
+base_lm_model = base_lm.fit(X_train, y_train.ravel())
+# Make Predictions
+base_lm_pred=base_lm_model.predict(X_test)
+
+# Calculate Accuracy, Precision, Recall, and F1 score
+base_lm_accuracy = accuracy_score(y_test, base_lm_pred)
+base_lm_precision = precision_score(y_test, base_lm_pred)
+base_lm_recall = recall_score(y_test, base_lm_pred)
+base_lm_f1 = 2 * (base_lm_precision * base_lm_recall) / (base_lm_precision + base_lm_recall)
+
+# Calculate AUC score
+base_lm_probs = base_lm.predict_proba(X_test)
+base_lm_probs = base_lm_probs[:,1]
+# base_lm_auc = roc_auc_score(y_test, base_lm_probs)
+
+# Display the metrics
+print("Logistic Regression: Imbalanced Data")
+print(" - Accuracy : ",'{:.3f}'.format(base_lm_accuracy))
+print(" - Precision: ",'{:.3f}'.format(base_lm_precision))
+print(" - Recall   : ",'{:.3f}'.format(base_lm_recall))
+print(" - F1 score : ",'{:.3f}'.format(base_lm_f1))
+# print(" - AUC score: ",'{:.3f}'.format(base_lm_auc))
+
+# Display the confusion matrix
+print("Confusion Matrix")
+print(confusion_matrix(y_test,base_lm_pred))
+import pickle 
+# open a file, where you ant to store the data
+file = open('logistic_regression_model', 'wb')
+
+# dump information to that file
+pickle.dump(base_lm_model, file)
+### KNN with Imbalanced Data
+# Initiate the model
+base_knn = KNeighborsClassifier()
+# Fit the model
+base_knn_model = base_knn.fit(X_train, y_train.ravel())
+# Make Predictions
+base_knn_pred=base_knn_model.predict(X_test)
+
+# Calculate Accuracy, Precision, Recall, and F1 score
+base_knn_accuracy = accuracy_score(y_test, base_knn_pred)
+base_knn_precision = precision_score(y_test, base_knn_pred)
+base_knn_recall = recall_score(y_test, base_knn_pred)
+base_knn_f1 = 2 * (base_knn_precision * base_knn_recall) / (base_knn_precision + base_knn_recall)
+
+# Calculate AUC score
+base_knn_probs = base_knn.predict_proba(X_test)
+base_knn_probs = base_knn_probs[:,1]
+# base_knn_auc = roc_auc_score(y_test, base_knn_probs)
+
+# Display the metrics
+print("KNN Classifier: Imbalanced Data")
+print(" - Accuracy : ",'{:.3f}'.format(base_knn_accuracy))
+print(" - Precision: ",'{:.3f}'.format(base_knn_precision))
+print(" - Recall   : ",'{:.3f}'.format(base_knn_recall))
+print(" - F1 score : ",'{:.3f}'.format(base_knn_f1))
+# print(" - AUC score: ",'{:.3f}'.format(base_knn_auc))
+
+# Display the confusion matrix
+print("Confusion Matrix")
+print(confusion_matrix(y_test,base_knn_pred))
+import pickle 
+# open a file, where you ant to store the data
+file = open('knn_classification_model', 'wb')
+
+# dump information to that file
+pickle.dump(base_knn_model, file)
+### SVM with Imbalanced Data
+# Initiate the model
+base_svc = SVC(kernel='rbf',probability=True)
+# Fit the model
+base_svc_model = base_svc.fit(X_train, y_train.ravel())
+# Make Predictions
+base_svc_pred = base_svc_model.predict(X_test)
+
+# Calculate Accuracy, Precision, Recall, and F1 score
+base_svc_accuracy = accuracy_score(y_test, base_svc_pred)
+base_svc_precision = precision_score(y_test, base_svc_pred)
+base_svc_recall = recall_score(y_test, base_svc_pred)
+base_svc_f1 = 2 * (base_svc_precision * base_svc_recall) / (base_svc_precision + base_svc_recall)
+
+# Calculate AUC score
+base_svc_probs = base_svc.predict_proba(X_test)
+base_svc_probs = base_svc_probs[:,1]
+# base_svc_auc = roc_auc_score(y_test, base_svc_probs)
+
+# Display the metrics
+print("SVM Classifier: Imbalanced Data")
+print(" - Accuracy : ",'{:.3f}'.format(base_svc_accuracy))
+print(" - Precision: ",'{:.3f}'.format(base_svc_precision))
+print(" - Recall   : ",'{:.3f}'.format(base_svc_recall))
+print(" - F1 score : ",'{:.3f}'.format(base_svc_f1))
+# print(" - AUC score: ",'{:.3f}'.format(base_svc_auc))
+
+# Display the confusion matrix
+print("Confusion Matrix")
+print(confusion_matrix(y_test,base_svc_pred))
+import pickle 
+# open a file, where you ant to store the data
+file = open('svc_classification_model', 'wb')
+
+# dump information to that file
+pickle.dump(base_svc_model, file)
+# Initiate the model
+base_tree = DecisionTreeClassifier()
+# Fit the model
+base_tree_model = base_tree.fit(X_train, y_train.ravel())
+# Make Predictions
+base_tree_pred=base_tree_model.predict(X_test)
+
+# Calculate Accuracy, Precision, Recall, and F1 score
+base_tree_accuracy = accuracy_score(y_test, base_tree_pred)
+base_tree_precision = precision_score(y_test, base_tree_pred)
+base_tree_recall = recall_score(y_test, base_tree_pred)
+base_tree_f1 = 2 * (base_tree_precision * base_tree_recall) / (base_tree_precision + base_tree_recall)
+
+# Calculate AUC score
+base_tree_probs = base_tree.predict_proba(X_test)
+base_tree_probs = base_tree_probs[:,1]
+# base_tree_auc = roc_auc_score(y_test, base_tree_probs)
+
+# Display the metrics
+print("Decision Tree Classifier: Imbalanced Data")
+print(" - Accuracy : ",'{:.3f}'.format(base_tree_accuracy))
+print(" - Precision: ",'{:.3f}'.format(base_tree_precision))
+print(" - Recall   : ",'{:.3f}'.format(base_tree_recall))
+print(" - F1 score : ",'{:.3f}'.format(base_tree_f1))
+# print(" - AUC score: ",'{:.3f}'.format(base_tree_auc))
+
+# Display the confusion matrix
+print("Confusion Matrix")
+print(confusion_matrix(y_test,base_tree_pred))
+import pickle 
+# open a file, where you ant to store the data
+file = open('tree_classification_model', 'wb')
+
+# dump information to that file
+pickle.dump(base_tree_model, file)
